@@ -1,0 +1,111 @@
+# EscolarOnline - Docker Compose (Local) - ACT2.3
+# Uso: docker compose build && docker compose up -d
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: escolaronline-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_USER: alumno
+      MYSQL_PASSWORD: alumno123
+      MYSQL_DATABASE: escolar_online
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - escolaronline-net
+
+  frontend:
+    build: ./microservicioEKSFrontend
+    container_name: escolaronline-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - get-products
+    networks:
+      - escolaronline-net
+
+  get-products:
+    build: ./microserviciosEKSBackend/get-products
+    container_name: escolaronline-get-products
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: db
+      DB_USER: alumno
+      DB_PASS: alumno123
+      DB_NAME: escolar_online
+      PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - escolaronline-net
+
+  create-product:
+    build: ./microserviciosEKSBackend/create-product
+    container_name: escolaronline-create-product
+    ports:
+      - "3002:3002"
+    environment:
+      DB_HOST: db
+      DB_USER: alumno
+      DB_PASS: alumno123
+      DB_NAME: escolar_online
+      PORT: 3002
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - escolaronline-net
+
+  update-product:
+    build: ./microserviciosEKSBackend/update-product
+    container_name: escolaronline-update-product
+    ports:
+      - "3003:3003"
+    environment:
+      DB_HOST: db
+      DB_USER: alumno
+      DB_PASS: alumno123
+      DB_NAME: escolar_online
+      PORT: 3003
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - escolaronline-net
+
+  delete-product:
+    build: ./microserviciosEKSBackend/delete-product
+    container_name: escolaronline-delete-product
+    ports:
+      - "3004:3004"
+    environment:
+      DB_HOST: db
+      DB_USER: alumno
+      DB_PASS: alumno123
+      DB_NAME: escolar_online
+      PORT: 3004
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - escolaronline-net
+
+volumes:
+  mysql_data:
+
+networks:
+  escolaronline-net:
+    driver: bridge
+
+# 2026 - Disenador asignatura: Ignacio A. Pastenet M.

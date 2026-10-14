@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: escolaronline-ingress
+  namespace: escolaronline
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+spec:
+  rules:
+  - http:
+      paths:
+      # Un solo path: todo el trafico va al Service frontend (Nginx).
+      # El ALB Ingress no puede distinguir por metodo HTTP (GET/POST/PUT/DELETE);
+      # esa logica vive en el nginx.conf del contenedor frontend, que enruta
+      # internamente a cada microservicio por nombre DNS de Service (ClusterIP).
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80

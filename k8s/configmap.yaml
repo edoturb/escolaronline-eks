@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: escolaronline-config
+  namespace: escolaronline
+data:
+  DB_HOST: "escolaronline-db.cpxdmt5llnyr.us-east-1.rds.amazonaws.com"
+  DB_NAME: "escolar_online"
+  DB_PORT: "3306"
